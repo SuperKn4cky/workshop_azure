@@ -1,0 +1,54 @@
+#connexion a azure
+az login
+
+#créer un groupe
+az group create --name workshop --location northeurope
+
+#créer la vm
+az vm create --resource-group workshop --name debian --location northeurope --image Debian:debian-11:11-gen2:latest --size Standard_B1s --admin-username azureadmin --generate-ssh-keys
+
+#connexion ssh
+ssh 74.234.108.63 -l azureadmin
+
+#créer le storage account
+az storage account create --name workshopae5bbb02 --resource-group workshop --location northeurope --sku Standard_LRS --kind StorageV2
+
+#mettre la clé du storage dans une variable
+$STORAGE_KEY = az storage account keys list --resource-group workshop --account-name workshopae5bbb02 --query "[0].value" -o tsv
+
+#créer un conteneur dans le storage
+az storage container create --name mycontainer --account-name workshopae5bbb02 --account-key $STORAGE_KEY
+
+#upload un fichier dans le blob
+az storage blob upload --container-name mycontainer --file "C:\Users\Quentin\Downloads\monkey.png" --name monkey.png --account-name workshopae5bbb02 --account-key $STORAGE_KEY
+
+#vérifier si le fichier est présent
+az storage blob list --account-name workshopae5bbb02 --container-name mycontainer --output table --account-key $STORAGE_KEY
+
+#mettre l'account et le container en ligne
+az storage account update --name workshopae5bbb02 --resource-group workshop --allow-blob-public-access true
+az storage container set-permission --name mycontainer --account-name workshopae5bbb02 --account-key $STORAGE_KEY --public-access blob
+
+#récuperer l'url du fichier
+az storage blob url --account-name workshopae5bbb02 --container-name mycontainer --name monkey.png --output tsv --account-key $STORAGE_KEY
+
+#créer un registre de conteneur
+az acr create --name workshopregistry --resource-group workshop --location northeurope --sku Basic --admin-enabled true
+
+#si nécessaire enregistrer le fournisseur de ressource ContainerInstance
+az provider register --namespace Microsoft.ContainerInstance
+
+#créer une instance de conteneur
+az container create --name workshop-instance --resource-group workshop --image httpd:latest --cpu 1 --memory 1.5 --registry-login-server workshopregistry.azurecr.io --registry-username $(az acr credential show --name workshopregistry --query "username" -o tsv) --registry-password $(az acr credential show --name workshopregistry --query "passwords[0].value" -o tsv) --dns-name-label workshop-instance --ports 80 --os-type Linux
+
+#créer un conteneur apache accessible en ligne
+az container create --name workshop-instance --resource-group workshop --image httpd:latest --cpu 1 --memory 1.5 --os-type Linux --dns-name-label workshop-instance --ports 80
+
+#vérifier si il est en ligne sur http://workshop-instance.francecentral.azurecontainer.io
+
+#pour le fun
+az storage share create --name webfiles --account-name workshopae5bbb02 --account-key $(az storage account keys list --resource-group workshop --account-name workshopae5bbb02 --query "[0].value" -o tsv)
+
+#Upload un fichier pour s'en servir sur apache 
+az storage file upload --source "C:\Users\Quentin\Downloads\index.html" --path index.html --share-name webfiles --account-name workshopae5bbb02 --account-key $(az storage account keys list --resource-group workshop --account-name workshopae5bbb02 --query "[0].value" -o tsv)
+
