@@ -47,8 +47,15 @@ az container create --name workshop-instance --resource-group workshop --image h
 #vérifier si il est en ligne sur http://workshop-instance.francecentral.azurecontainer.io
 
 #pour le fun
+#créer un partage de fichiers
 az storage share create --name webfiles --account-name workshopae5bbb02 --account-key $(az storage account keys list --resource-group workshop --account-name workshopae5bbb02 --query "[0].value" -o tsv)
 
 #Upload un fichier pour s'en servir sur apache 
 az storage file upload --source "C:\Users\Quentin\Downloads\index.html" --path index.html --share-name webfiles --account-name workshopae5bbb02 --account-key $(az storage account keys list --resource-group workshop --account-name workshopae5bbb02 --query "[0].value" -o tsv)
+
+#recreer le conteneur
+az container delete --name workshop-instance --resource-group workshop --yes
+az container create --name workshop-instance --resource-group workshop --image httpd:latest --cpu 1 --memory 1.5 --os-type Linux --dns-name-label workshop-instance --ports 80 --azure-file-volume-account-name workshopae5bbb02 --azure-file-volume-share-name webfiles --azure-file-volume-mount-path /usr/local/apache2/htdocs --azure-file-volume-account-key $(az storage account keys list --resource-group workshop --account-name workshopae5bbb02 --query "[0].value" -o tsv)
+
+#vérifier si il est en ligne sur http://workshop-instance.francecentral.azurecontainer.io
 
