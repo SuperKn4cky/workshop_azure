@@ -10,6 +10,9 @@ az vm create --resource-group workshop --name debian --location northeurope --im
 #connexion ssh
 ssh 74.234.108.63 -l azureadmin
 
+#supprier la vm
+az vm delete --resource-group workshop --name debian --yes
+
 #créer le storage account
 az storage account create --name workshopae5bbb02 --resource-group workshop --location northeurope --sku Standard_LRS --kind StorageV2
 
