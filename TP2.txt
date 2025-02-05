@@ -1,0 +1,32 @@
+# TP2
+# Create a VNet
+az network vnet create --name MyVNet --resource-group workshop --location northeurope --address-prefix 10.0.0.0/16
+
+# Add two subnets
+az network vnet subnet create --name Subnet1 --resource-group workshop --vnet-name MyVNet --address-prefix 10.0.1.0/24
+
+az network vnet subnet create --name Subnet2 --resource-group workshop --vnet-name MyVNet --address-prefix 10.0.2.0/24
+
+# Create an NSG
+az network nsg create --name MyNSG --resource-group workshop --location northeurope
+
+# Block SSH port (22)
+az network nsg rule create --resource-group workshop --nsg-name MyNSG --name BlockSSH --protocol Tcp --direction Inbound --priority 1000 --source-address-prefix "*" --source-port-range "*" --destination-address-prefix "*" --destination-port-range 22 --access Deny
+
+# Allow HTTP port (80)
+az network nsg rule create --resource-group workshop --nsg-name MyNSG --name AllowHTTP --protocol Tcp --direction Inbound --priority 100 --source-address-prefix "*" --source-port-range "*" --destination-address-prefix "*" --destination-port-range 80 --access Allow
+
+# Associate the NSG with subnet 1
+az network vnet subnet update --resource-group workshop --vnet-name MyVNet --name Subnet1 --network-security-group MyNSG
+
+# Verify the application of rules
+az network nsg show --resource-group workshop --name MyNSG
+
+# Create a public IP address
+az network public-ip create --name MyPublicIP --resource-group workshop --location northeurope --allocation-method Static --sku Standard
+
+# Create the subnet for Bastion
+az network vnet subnet create --name AzureBastionSubnet --resource-group workshop --vnet-name MyVNet --address-prefix 10.0.3.0/27
+
+# Create the Bastion service
+az network bastion create --name MyBastion --resource-group workshop --location northeurope --public-ip-address MyPublicIP --vnet-name MyVNet
