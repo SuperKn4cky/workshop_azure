@@ -1,0 +1,121 @@
+#TP3
+1. Créer un partage de fichiers, l’associer à une VM et mettre en place la sauvegarde
+Créer un compte de stockage
+
+Dans le Portail Azure, cliquer sur Créer une ressource (bouton « + Créer ») en haut à gauche.
+Rechercher Compte de stockage et cliquer sur Créer.
+Renseigner le Groupe de ressources, le Nom du compte de stockage, la Région, etc.
+Conserver le type de redondance par défaut (ou adapter si nécessaire).
+Valider pour créer le compte de stockage.
+Créer un partage de fichiers (File Share)
+
+Une fois le compte de stockage créé, aller dans Comptes de stockage > sélectionner votre compte de stockage.
+Dans la barre de gauche, chercher Partages de fichiers (File shares).
+Cliquer sur + Ajouter un partage de fichiers.
+Nommer votre partage, indiquer un quota si nécessaire, puis cliquer sur Créer.
+Créer une machine virtuelle Linux (VM)
+
+Dans le Portail Azure, cliquer à nouveau sur Créer une ressource.
+Rechercher Machine virtuelle et cliquer sur Créer.
+Choisir un Nom, un Groupe de ressources (ou le même que pour le stockage), un Système d’exploitation (Ubuntu, par exemple), la Taille, etc.
+Régler le Nom d’utilisateur et le Mot de passe/clé SSH.
+Valider pour créer la VM.
+Monter le partage de fichiers dans la VM
+
+Une fois la VM créée, aller dans la VM > Connexion (SSH ou Bastion).
+Dans la vue Partage de fichiers de votre compte de stockage (Portail Azure), cliquer sur Se connecter (ou Connect) pour obtenir le script de montage (il existe un onglet Linux).
+Copier le script proposé par Azure et l’exécuter dans la VM (avec sudo).
+Vérifier qu’un nouveau point de montage est bien disponible (par exemple, dans /mnt).
+Pour tester, créer un fichier dans la VM (ex. touch /mnt/monfichier.txt). Vérifier dans le Portail Azure (Partages de fichiers > nom-du-partage) que le fichier est visible.
+Activer la sauvegarde (Backup) du partage de fichiers
+
+Dans le Portail Azure, chercher Recovery Services vaults.
+Créer un coffre Recovery Services (Recovery Services Vault) si vous n’en avez pas déjà un.
+Une fois le vault créé, dans la barre de gauche du vault, cliquer sur Backup.
+Sélectionner Azure comme lieu de fonctionnement de la charge de travail, puis Fichiers Azure (Azure Files).
+Sélectionner le compte de stockage et le partage de fichiers à sauvegarder.
+Configurer la Politique de sauvegarde (fréquence, rétention), puis valider.
+Tester la sauvegarde et la restauration
+
+Attendre que la première sauvegarde s’exécute (ou forcer une sauvegarde à la main depuis Backup now).
+Pour tester la restauration, vous pouvez soit :
+Supprimer un fichier présent dans le partage de fichiers depuis la VM.
+Puis, dans le Portail Azure, retourner dans votre coffre Recovery Services > Backup Items > sélectionner votre partage de fichiers > Restore.
+Sélectionner le point de restauration, l’emplacement de restauration (nouveau partage ou partage existant).
+Lancer la restauration et vérifier qu’à la fin du processus, le fichier est revenu.
+
+2. Créer un serveur SQL, activer la sauvegarde et restaurer
+Créer un serveur SQL Azure
+
+Dans le Portail Azure, cliquer sur Créer une ressource.
+Rechercher SQL Server (base de données SQL) et cliquer sur Créer.
+Sélectionner Base de données unique (Single Database) ou Serveur selon le chemin proposé.
+Configurer le Nom du serveur, l’Admin login et le mot de passe, la Localisation, etc.
+Valider pour créer le serveur.
+Créer une base de données SQL
+
+Aller dans le serveur SQL nouvellement créé.
+Cliquer sur + Créer une base de données (ou directement lors de la création précédente).
+Nommer la base (ex. MaBaseSQL).
+Choisir la Taille ou le Pricing tier (ex. Basic ou un plan standard selon vos besoins).
+Valider.
+Activer la sauvegarde automatique
+
+Par défaut, Azure SQL Database possède déjà un mécanisme de sauvegarde automatique (PITR : Point In Time Restore). Vous pouvez ajuster la Période de rétention.
+Dans le Portail Azure, aller dans Serveurs SQL > nom-du-serveur > Paramètres > Sauvegardes (Backups) pour vérifier les paramètres de rétention.
+Insérer des données dans la base
+
+Depuis le Portail Azure, aller dans Bases de données SQL > sélectionner la base, puis Outils > Ouvrir dans Azure Cloud Shell ou cliquer sur Query Editor (prévoir de rentrer l’identifiant/mot de passe).
+Créer une table, insérer des données via des requêtes SQL (ex. CREATE TABLE test ... ; INSERT INTO test VALUES(...);).
+Restaurer la base (test)
+
+Pour simuler la suppression, vous pouvez supprimer la base de données via le portail.
+Dans Serveurs SQL > sélectionner votre serveur > Bases de données > Ajouter ou Restaurer.
+Choisir le point de restauration (la date/heure) et renseigner un nom pour la base restaurée.
+Lancer la restauration et vérifier que la base restaurée contient bien vos données.
+
+3. Créer un compte Cosmos DB pour MongoDB, sauvegarde et restauration
+Créer un compte Cosmos DB
+
+Dans le Portail Azure, cliquer sur Créer une ressource.
+Rechercher Azure Cosmos DB et cliquer sur Créer.
+Sélectionner l’API MongoDB.
+Configurer le Nom de l’instance Cosmos, le Groupe de ressources, la Région, etc.
+Valider.
+Créer une base de données et une collection
+
+Dans votre compte Cosmos DB, aller dans Data Explorer (Explorateur de données).
+Cliquer sur New Database pour créer une base.
+Cliquer sur New Collection pour créer une collection (ou le terme peut être Container selon l’interface).
+Sauvegarde continue
+
+Aller dans Paramètres de votre compte Cosmos DB > Backup & Restore.
+Sélectionner le mode de sauvegarde continue si disponible pour l’API Mongo.
+Configurer la période de rétention, etc.
+Insérer des documents
+
+Utiliser Data Explorer pour insérer un document JSON (Mongo).
+Vous pouvez aussi vous connecter via un outil Mongo externe (en récupérant la chaîne de connexion dans Clés > Primary Connection String).
+Restaurer la base
+
+Pour tester, vous pouvez supprimer la base ou la collection, puis demander la restauration depuis Backup & Restore ou Support + troubleshooting.
+Sélectionner la date/heure de restauration pour recréer la base et la collection.
+
+4. Sauvegarder une VM (Recovery Vault) et restaurer
+Créer un coffre Recovery Services (si pas déjà fait)
+
+Dans le Portail Azure, chercher Recovery Services vaults.
+Cliquer sur Créer puis choisir un Nom, un Groupe de ressources, et la Région.
+Activer la sauvegarde (Backup) sur la VM
+
+Aller dans le coffre Recovery Services > Backup.
+Sélectionner Azure comme where your workload is running, puis Machine virtuelle Azure.
+Sélectionner la VM à protéger et définir la Politique de sauvegarde.
+Démarrer la sauvegarde ou laisser le déclenchement automatique.
+Réaliser une restauration
+
+Pour tester, éteindre ou supprimer la VM (attention aux coûts/risques).
+Dans le coffre Recovery Services > Backup Items > Azure VM.
+Sélectionner la VM sauvegardée, choisir Restore VM.
+Choisir Créer une nouvelle VM ou Restaurer le disque (pour rattacher à une VM existante).
+Lancer la restauration et vérifier la disponibilité de la VM restaurée.

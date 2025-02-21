@@ -1,0 +1,67 @@
+TP5 – Monitoring et Sécurisation
+1. Activer Azure Monitor sur une VM, configurer métriques et alertes
+Créer la VM (base de monitoring)
+
+Comme décrit précédemment (VM Linux ou Windows).
+Activer Monitor / Insights
+
+Dans le Portail Azure, aller dans la VM > Insights ou Monitoring > Activer.
+Une fois activé, Azure collectera CPU, mémoire (via l’extension Diagnostics), Network, etc.
+Créer un tableau (Metrics)
+
+Dans la barre de gauche, cliquer sur Monitor (ou Metrics).
+Sélectionner la Portée (Scope) = votre VM.
+Choisir les métriques : CPU Percentage, Available Memory, Network In, Network Out.
+Sauvegarder votre vue si vous le souhaitez (bouton Pin to dashboard pour l’épingler).
+Créer une alerte lorsque la CPU dépasse 80 %
+
+Depuis l’onglet Alerts (ou Alerte), cliquer sur + New Alert Rule.
+Sélectionner la Ressource (votre VM), puis Condition = CPU > 80% sur X minutes.
+Ajouter une Action Group (par ex. notifier par email).
+Nommer la règle d’alerte et créer.
+Tester l’alerte
+
+Générer de la charge CPU dans la VM (stress test ou un script).
+Surveiller si l’alerte se déclenche et si vous recevez la notification.
+2. Optimiser les coûts, définir des budgets et alertes
+Vérifier l’état de vos ressources
+
+Supprimer ou stopper les ressources inutiles pour réduire la facture.
+Créer un budget quotidien dans Cost Management
+
+Dans le Portail Azure, chercher Cost Management + Billing.
+Aller dans Budgets > +Ajouter un budget.
+Choisir un Montant (ex. 2 ou 3 € par jour) et une Période (mensuelle, quotidienne, etc.).
+Valider.
+Créer une alerte à 80 % du budget
+
+Lors de la création du budget (ou après), définir un Seuil d’alerte (ex. 80 %).
+Renseigner l’adresse e-mail ou un groupe d’action.
+Faire augmenter les coûts
+
+Par exemple, redimensionner la VM à une taille plus grande pour dépasser le budget.
+Vérifier que l’alerte de budget est envoyée.
+3. Sécuriser des secrets avec Key Vault, les lier à une VM
+Créer un Key Vault
+
+Dans le Portail Azure, cliquer sur Créer une ressource.
+Rechercher Key Vault et cliquer sur Créer.
+Nommer le Key Vault, sélectionner le Groupe de ressources, la Région, etc.
+Valider.
+Stocker un secret dans le Key Vault
+
+Aller dans le Key Vault > Secrets.
+Cliquer sur + Générer/Importer.
+Saisir un Nom (ex. monSecret) et une Valeur (mot de passe ou clé API).
+Valider.
+Créer une VM et lier le secret
+
+Soit, sur la VM existante, activer la Managed Identity (dans la configuration de la VM > Identity > passer System assigned à On).
+Dans le Key Vault > Access policies, autoriser la VM (via la Managed Identity) à accéder aux secrets.
+Depuis la VM, vous pouvez utiliser le SDK Azure ou l’Azure CLI (installée dans la VM) pour récupérer le secret.
+Récupérer le secret depuis la VM (exemple via Azure CLI)
+
+Installer l’Azure CLI sur la VM.
+Lancer la commande (attention à l’URL de votre vault) :
+az keyvault secret show --vault-name MonKeyVault --name monSecret
+Vous obtenez la valeur du secret si les droits d’accès sont bien configurés.

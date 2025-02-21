@@ -1,0 +1,99 @@
+1. Créer un site web Python (Flask) sur Azure App Service
+Créer un Plan App Service
+
+Dans le Portail Azure, cliquer sur Créer une ressource.
+Rechercher App Service et cliquer sur Créer.
+Choisir Créer un plan d’hébergement (ex. nommer « PlanFlask »), sélectionner l’Offre Gratuite (F1) si disponible.
+Valider.
+Créer l’application web
+
+Toujours dans la création, sélectionner ou créer un Plan App Service (celui que vous venez de configurer).
+Renseigner le Runtime stack (Python 3.9, par exemple).
+Valider pour créer l’application.
+Déployer via Git (GitHub)
+
+Dans votre App Service, aller dans Déploiement > Centre de déploiement.
+Sélectionner GitHub comme source.
+Autoriser l’accès à votre compte GitHub si nécessaire.
+Choisir le Repository contenant votre code Flask, et la branche désirée.
+Cliquer sur Enregistrer (Save) pour lancer le déploiement automatique.
+Une fois le déploiement fini, cliquer sur l’URL de l’application pour la tester.
+
+2. Automatiser un déploiement avec Terraform (sur Azure)
+Installer Terraform (en local)
+
+(Hors portail, mais mentionné pour rappel) : Téléchargez Terraform sur votre machine de développement.
+Créer le fichier main.tf (exemple)
+
+Vous pouvez stocker ce fichier dans un repo, mais côté portail Azure il n’y a pas d’éditeur Terraform natif.
+Le fichier décrira vos ressources (App Service, Plan, etc.).
+Déployer avec Azure Resource Manager
+
+Si vous souhaitez exécuter Terraform depuis la Cloud Shell Azure, ouvrez Cloud Shell (icône terminal en haut à droite).
+Importer (ou cloner) votre fichier main.tf.
+Exécuter terraform init, puis terraform plan, et enfin terraform apply.
+Valider et vérifier que les ressources (App Service, etc.) sont créées dans le Portail.
+
+3. Créer un Virtual Machine Scale Set (VMSS) et activer l’auto-scaling
+Créer un Scale Set
+
+Dans le Portail Azure, cliquer sur Créer une ressource.
+Rechercher Machine Virtual Scale Set et cliquer sur Créer.
+Sélectionner un Nom, un Groupe de ressources, la Région, etc.
+Choisir l’image Ubuntu, la taille, le login/mot de passe, etc.
+Indiquer Nombre d’instances initial, par exemple 2.
+Activer la règle d’auto-scaling (CPU > 75%)
+
+Toujours dans l’onglet Scaling, configurer les règles :
+Instance maximum (p. ex. 5).
+Condition : si l’utilisation CPU moyenne > 75% sur X minutes, ajouter 1 instance.
+Valider.
+Générer de la charge
+
+Se connecter en SSH sur l’une des VM du Scale Set (via la section Instances du VMSS).
+Installer stress ou exécuter des commandes simulant une forte CPU.
+Surveiller dans le Portail Azure > VMSS > Instances pour voir si une nouvelle VM est automatiquement créée.
+
+4. Déployer une Azure Function en Python
+Créer un compte de stockage pour la Function
+
+Dans le Portail Azure, cliquer sur Créer une ressource > Compte de stockage.
+Configurer comme souhaité et valider.
+Créer une Function App
+
+Dans le Portail Azure, cliquer sur Créer une ressource > Function App.
+Choisir un Nom, sélectionner Python comme Runtime, et désigner le compte de stockage.
+Valider pour créer la Function App.
+Créer une fonction HTTP Trigger
+
+Via VS Code (avec l’extension Azure Functions) ou directement via le portail :
+Dans votre Function App, aller dans Fonctions (Functions) > + Ajouter ou + Créer.
+Choisir un modèle HTTP trigger.
+Nommer la fonction.
+Tester la fonction localement (optionnel si vous travaillez en local)
+
+Vous pouvez développer en local, puis déployer via VS Code ou Azure CLI.
+Déployer la fonction (VS Code ou Zip)
+
+Depuis VS Code : cliquer sur Azure (extension), se connecter, cliquer droit sur la Function App, Deploy to Function App.
+Ou en Zip/FTP dans le Portail.
+Tester la fonction en ligne
+
+Dans le Portail Azure > Function App > votre fonction.
+Cliquer sur Code + Test.
+Cliquer sur Tester/Exécuter et vérifier la réponse.
+
+5. Lier une fonction à un déclencheur Blob Storage
+Créer une fonction Blob Trigger
+
+Dans votre Function App, aller dans Fonctions > + Créer.
+Sélectionner Azure Blob Storage trigger.
+Renseigner le nom du container à surveiller.
+Créer un conteneur dans le compte de stockage
+
+Aller dans le compte de stockage associé.
+Dans la section Blob service > Containers, créer un conteneur (ex. monconteneur).
+Ajouter un fichier pour déclencher la fonction
+
+Depuis Containers > monconteneur > Téléverser (Upload) un fichier.
+Surveiller les Logs de la Function (dans Monitor ou Logs) pour vérifier que la fonction s’est exécutée.
